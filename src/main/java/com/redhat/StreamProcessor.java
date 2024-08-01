@@ -47,7 +47,8 @@ public class StreamProcessor {
     @Produces(MediaType.APPLICATION_JSON)
     public Object[] getData() {
         Properties props = new Properties();
-        bootstrapServers = "http://kafka-bootstrap-data-visualization.apps.rh-ocp-01.cool.lab:80";
+        //bootstrapServers = "http://kafka-bootstrap-data-visualization.apps.rh-ocp-01.cool.lab:80";
+        bootstrapServers = "my-cluster-kafka-bootstrap:9092";
         props.put("bootstrap.servers", bootstrapServers);
         props.put("application.id", "kafka-streams-app");
         props.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
