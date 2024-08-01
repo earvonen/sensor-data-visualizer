@@ -107,7 +107,8 @@ public class StreamProcessor {
     @Produces(MediaType.APPLICATION_JSON)
     public void printAllData() {
         Properties props = new Properties();
-        props.put("bootstrap.servers", "http://kafka-bootstrap-data-visualization.apps.rh-ocp-01.cool.lab:80"); // Set your Kafka broker address
+        //props.put("bootstrap.servers", "http://kafka-bootstrap-data-visualization.apps.rh-ocp-01.cool.lab:80"); // Set your Kafka broker address
+        props.put("bootstrap.servers", "my-cluster-kafka-bootstrap:9092"); // Set your Kafka broker address
         props.put("group.id", "test-group"); // Consumer group ID
         props.put("enable.auto.commit", "true"); // Enable auto commit
         props.put("auto.commit.interval.ms", "1000"); // Auto commit interval
