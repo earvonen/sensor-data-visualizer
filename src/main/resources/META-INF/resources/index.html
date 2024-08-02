@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Kafka Data Viewer</title>
+</head>
+<body>
+    <h1>Kafka Stream Data</h1>
+    <ul id="dataList"></ul>
+
+    <script>
+        async function fetchData() {
+            const response = await fetch('https://sensor-data-visualizer-git-data-visualization.apps.rh-ocp-01.cool.lab/data/get', {mode: 'no-cors'});
+            const data = await response.json();
+            const list = document.getElementById('dataList');
+            list.innerHTML = '';
+            data.forEach(item => {
+                const li = document.createElement('li');
+                li.appendChild(document.createTextNode(item));
+                list.appendChild(li);
+            });
+        }
+        setInterval(fetchData, 1000); // Update every second
+    </script>
+</body>
+</html>
