@@ -31,11 +31,9 @@ import java.time.Duration;
 public class StreamProcessor {
 
 
-    @ConfigProperty(name = "quarkus.kafka-streams.bootstrap-servers")
+    @ConfigProperty(name = "bootstrap.servers")
     String bootstrapServers;
 
-    //private static KafkaStreams streams;
-    //private static KTable<Windowed<Object>, Long> windowedSensorData;
 
     void onStart(@Observes StartupEvent ev) {
         
@@ -47,25 +45,20 @@ public class StreamProcessor {
     @Produces(MediaType.APPLICATION_JSON)
     public Object[] getData() {
         Properties props = new Properties();
-        //bootstrapServers = "http://kafka-bootstrap-data-visualization.apps.rh-ocp-01.cool.lab:80";
-        bootstrapServers = "my-cluster-kafka-bootstrap:9092";
         props.put("bootstrap.servers", bootstrapServers);
-        props.put("application.id", "kafka-streams-app");
         props.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
         props.put("value.deserializer", "org.apache.kafka.common.serialization.DoubleDeserializer");
         props.put(ConsumerConfig.GROUP_ID_CONFIG, "test-group");
         // Create a Kafka consumer
         KafkaConsumer<String, String> consumer = new KafkaConsumer<>(props);
-
-        // Subscribe to a topic
-        String topic = "sensor-data"; // Replace with your topic name
-        consumer.subscribe(Arrays.asList(topic));
+        TopicPartition partition0 = new TopicPartition("sensor-data", 0); // Specify topic and partition
+        consumer.assign(Arrays.asList(partition0));
 
         // Define the time window to fetch messages from (last minute)
-        long oneMinuteAgo = System.currentTimeMillis() - 60000000; // Timestamp for one minute ago
+        long oneMinuteAgo = System.currentTimeMillis() - 60000; // Timestamp for one minute ago
 
         // Wait until the consumer is assigned partitions
-        consumer.poll(Duration.ofMillis(0)); // You may need to adjust this duration
+        consumer.poll(Duration.ofMillis(100)); // You may need to adjust this duration
         consumer.assignment().forEach(partition -> {
             // For each partition, find the offset at the timestamp
             Map<TopicPartition, Long> timestampToSearch = Map.of(partition, oneMinuteAgo);
@@ -107,29 +100,27 @@ public class StreamProcessor {
     @Produces(MediaType.APPLICATION_JSON)
     public void printAllData() {
         Properties props = new Properties();
-        //props.put("bootstrap.servers", "http://kafka-bootstrap-data-visualization.apps.rh-ocp-01.cool.lab:80"); // Set your Kafka broker address
-        props.put("bootstrap.servers", "my-cluster-kafka-bootstrap:9092"); // Set your Kafka broker address
-        props.put("group.id", "test-group"); // Consumer group ID
-        props.put("enable.auto.commit", "true"); // Enable auto commit
-        props.put("auto.commit.interval.ms", "1000"); // Auto commit interval
-        props.put("auto.offset.reset", "earliest"); // Auto commit interval
+        props.put("bootstrap.servers", bootstrapServers); // Set your Kafka broker address
         props.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer"); // Key deserializer
         props.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer"); // Value deserializer
 
         // Create a Kafka consumer
         KafkaConsumer<String, String> consumer = new KafkaConsumer<>(props);
+        TopicPartition partition0 = new TopicPartition("sensor-data", 0); // Specify topic and partition
+        consumer.assign(Arrays.asList(partition0));
+
 
         // Subscribe to the "sensor-data" topic
-        consumer.subscribe(Collections.singletonList("sensor-data"));
+        //consumer.subscribe(Collections.singletonList("sensor-data"));
         System.out.println("Subscribed");
 
         // Poll for new data and print it
         try {
             for(int i=0; i<100; i++){
                 System.out.println("Reading next record");
-                ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(100));
+                ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(1000000));
                 for (ConsumerRecord<String, String> record : records) {
-                    System.out.printf("offset = %d, key = %s, value = %s%n", record.offset(), record.key(), record.value());
+                    System.out.printf("offset = %d, key = %s, value = %s%n, timestamp = %d", record.offset(), record.key(), record.value(), record.timestamp());
                 }
             }
         } finally {
