@@ -47,7 +47,7 @@ public class StreamProcessor {
         Properties props = new Properties();
         props.put("bootstrap.servers", bootstrapServers);
         props.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
-        props.put("value.deserializer", "org.apache.kafka.common.serialization.DoubleDeserializer");
+        props.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
         props.put(ConsumerConfig.GROUP_ID_CONFIG, "test-group");
         // Create a Kafka consumer
         KafkaConsumer<String, String> consumer = new KafkaConsumer<>(props);
